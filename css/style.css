@@ -1,0 +1,151 @@
+.spacer-60 {
+    margin-top: 60px;
+}
+.supplier {
+    font-weight: 600;
+    color: #28a745;
+}
+.supplier-form label {
+    font-size: 80%;
+    color: #007bff;
+}
+.red {
+    color: red;
+}
+.green {
+    color: #28a745;
+}
+.small-text {
+    font-size: 80%;
+}
+.supplier-name {
+    font-weight: bold;
+}
+
+.blue {
+    color: #007bff;
+}
+.bold {
+    font-weight: 700;
+}
+.big-form {
+    padding: 50px 0 50px 0;
+}
+.badge-margin {
+    margin-right: 10px;
+}
+.sidebar {
+    font-size: 80%;
+    font-weight: bold;
+}
+
+.angara-table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(209, 221, 234, 0.5);
+}
+.side-left a {
+    font-size: 160%;
+}
+.side-left li {
+    display: table-cell;
+    height: 50px;
+    list-style-type: none;
+    margin: 10px;
+    vertical-align: middle;
+}
+.supplier-table th {
+    font-size: 80%;
+}
+/* стили для левого меню */
+.left-cars{
+	line-height: 10px;
+	list-style-type: none;
+	font-size: 0.8rem;
+	color: #6c5ce7;
+	margin-top: 30px;
+}
+/* стили для правого меню */
+.left-adm-bar-sales a{
+	font-size: 2rem;
+	color: #6c5ce7;
+	font-weight: bold;
+}
+/* стили для формы поиска и рядом */
+.top-row{
+	font-size: 0.9rem;
+	padding:0.3rem 0 0.3rem 0;
+}
+.marg-20{
+	margin-right: 20px;
+}
+#countItems{
+	font-weight: bold;
+	color: #00cec9;
+}
+.div_search{
+	margin-top:10px;
+}
+.show_car_name_session{
+	font-weight:900;
+	color: #6c5ce7;
+}
+
+.left-adm-bar-sales {
+	list-style-type: none;
+}
+.search-table{
+	font-size: 0.8rem;
+}
+.search-table tr, .search-table td{
+	padding: 2px;
+}
+.div_search2{
+	margin-top:35px;
+}
+.flip-panel {
+	display:none
+}
+.flip-panel {
+	position:relative;
+	left:20px;
+}
+.flip{
+	position:relative;
+	left:10px;
+}
+.cars-table > table >tbody > tr > td{
+	font-size: 0.8rem;
+	padding: 0.2rem;
+	
+}
+.case-table > table >tbody > tr > td{
+	font-size: 0.9rem;
+	padding: 0.5rem;
+	
+}
+.red-text{
+	color: #e84393;
+	
+}
+.trash-tree a{
+	font-size: 2rem;
+	color: #e84393;
+	font-weight: bold;
+}
+.trash-tree2 a{
+	font-size: 1rem;
+	color: #e84393;
+	font-weight: bold;
+}
+.situation-no{
+	color: #e84393;
+	padding: 10px 0 10px 0;
+	text-align: center;
+	background-color: #81ecec;
+}
+.sup-table-ajax{
+	table-layout: fixed;
+    width: 100%;
+}
+.sup-table td{
+	overflow: hidden;
+}

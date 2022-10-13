@@ -1,0 +1,364 @@
+<?php
+include_once 'config.php';
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+header("Content-type: text/html; charset=utf-8");
+//$_POST['action'] = 'get_search_query';
+//$_POST['to_search'] = 'радиатор';
+
+if($_POST['action'] == 'rename_category') {
+    $id_to_rename = $_POST['id_to_rename'];
+    $to_rename = $_POST['old_name'];
+    $new_name = $_POST['new_name'];
+    rename_category($id_to_rename,$new_name);
+    $result = $id_to_rename  . ' ' . $to_rename . "->" . $new_name;
+  echo $result ;
+}
+
+if($_POST['action'] == 'add_category') {
+    $new_category = $_POST['new_category'];
+    add_category($new_category);
+    $result = $new_category;
+  echo $result ;
+}
+
+if($_POST['action'] == 'delete_category') {
+    $id_to_delete = $_POST['id_to_delete'];
+    delete_category($id_to_delete);
+    $result = 'delete +';
+  echo $result ;
+}
+
+if($_POST['action'] == 'delete_association') {
+    $id_to_delete = $_POST['id_to_delete'];
+     $first = $_POST['first'];
+     $second = $_POST['second'];
+    delete_association($first,$second);
+    $result = $new_category;
+  echo $result ;
+}
+
+if($_POST['action'] == 'delete_model') {
+    $id_to_delete = $_POST['id_to_delete'];
+    delete_model($id_to_delete);
+    $result = "del";
+  echo $result ;
+}
+
+if($_POST['action'] == 'delete_situation') {
+    $category_name = $_POST['category_name'];
+    $id_category_array = get_category_id($_POST['category_name']);
+    $id_category = $id_category_array['0']['id'];
+    $text_question = $_POST['text_question'];
+    $text_answer = $_POST['text_answer'];
+    $model = $_POST['model'];
+    delete_situation($id_category, $category_name, $text_question, $text_answer, $model);
+    $result = " ! " . $id_category . ' ' . $category_name . ' ' . $text_question .  ' ' . $text_answer .  ' ' . $model ;
+  echo $result ;
+}
+
+if($_POST['action'] == 'edit_situation') {
+    $category_name = $_POST['category_name'];
+    $id_category_array = get_category_id($_POST['category_name']);
+    $id_category = $id_category_array['0']['id'];
+    $text_question = $_POST['text_question'];
+    $text_question_new = $_POST['text_question_new'];
+    $text_answer = $_POST['text_answer'];
+    $text_answer_new = $_POST['text_answer_new'];
+    $model = $_POST['model'];
+    $model_new = $_POST['model_new'];
+    $result = "edit ! " . $id_category . ' ' . $category_name . ' ' . $text_question .  ' ' . $text_question_new .  ' ' . $text_answer .  ' ' . $text_answer_new .  ' ' . $model . ' ' . $model_new ;
+    edit_situation($id_category, $category_name, $text_question, $text_question_new, $text_answer, $text_answer_new, $model, $model_new);
+  echo $result ;
+}
+
+if($_POST['action'] == 'get_associations_query') {
+    $to_search = $_POST['to_search'];
+    $data = get_associations_query($to_search);
+    $result = rawurlencode(json_encode($data));
+  echo $result ;
+}
+
+if($_POST['action'] == 'get_synonyms_query') {
+    $to_search = $_POST['to_search'];
+    
+        $data = get_synonyms_query($to_search);
+    
+    
+    $result = json_encode($data);
+  echo $result ;
+}
+
+if($_POST['action'] == 'get_situations_query') {
+    $to_search = $_POST['to_search'];
+    $to_model = '';
+    if (isset($_POST['to_model'])) {
+        $to_model = $_POST['to_model'];
+    } 
+    $data = get_situations_query($to_search, $to_model);
+    $result = rawurlencode(json_encode($data));
+   //  $result = (json_encode($data, JSON_UNESCAPED_UNICODE));
+  //  echo '+ ' . $to_search . ' ' . $to_model;
+  echo $result ;
+}
+
+if($_POST['action'] == 'get_search_query') {
+    $data = get_search_query($_POST['to_search'], $_POST['car_name']);   
+    $result = (json_encode($data, JSON_UNESCAPED_UNICODE));
+    //p($_POST);
+    echo $result ;  
+}
+
+function rename_category($id_to_rename,$new_name){
+    rename_category_in_categories($id_to_rename,$new_name);
+    rename_category_in_associations_first($id_to_rename,$new_name);
+    rename_category_in_associations_second($id_to_rename,$new_name);
+    rename_category_in_synonyms($id_to_rename,$new_name);
+    rename_category_in_situations($id_to_rename,$new_name);
+}
+
+function rename_category_in_categories($id_to_rename,$new_name){
+    $m = db();
+   // $query = 'UPDATE salesscript_categories SET category_name="' . $new_name . '" WHERE id="' . $id_to_rename .  '" ';
+    $query = 'UPDATE salesscript_categories SET category_name= :new_name WHERE id= :id_to_rename';
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':new_name' => $new_name, ':id_to_rename' => $id_to_rename));
+  //  $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+  // return $data;
+}
+function rename_category_in_associations_first($id_to_rename,$new_name){
+    $m = db();
+    $query = 'UPDATE salesscript_associations SET category_name= :new_name WHERE id= :id_to_rename';
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':new_name' => $new_name, ':id_to_rename' => $id_to_rename));
+  //  $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+  // return $data;
+}
+function rename_category_in_associations_second($id_to_rename,$new_name){
+    $m = db();
+    $query = 'UPDATE salesscript_associations SET category_second= :new_name WHERE id_second= :id_to_rename';
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':new_name' => $new_name, ':id_to_rename' => $id_to_rename));
+  //  $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+  // return $data;
+}
+function rename_category_in_synonyms($id_to_rename,$new_name){
+    $m = db();
+    $query = 'UPDATE salesscript_synonyms SET category_name= :new_name WHERE id= :id_to_rename';
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':new_name' => $new_name, ':id_to_rename' => $id_to_rename));
+  //  $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+  // return $data;
+}
+function rename_category_in_situations($id_to_rename,$new_name){
+    $m = db();
+    $query = 'UPDATE salesscript_situations SET category_name= :new_name WHERE id= :id_to_rename';
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':new_name' => $new_name, ':id_to_rename' => $id_to_rename));
+  //  $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+  // return $data;
+}
+
+function add_category ($category_name) {
+     $m = db();
+     $query = 'INSERT INTO salesscript_categories (category_name) VALUES (" :category_name ")';
+     $sth = $m -> prepare($query);
+     $sth -> execute(array(':category_name' => $category_name));
+     //$data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+   //  return $data;
+}
+
+function get_category_id($category_name){
+    $m = db();
+    $query = 'SELECT * FROM salesscript_categories WHERE category_name= :category_name';
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':category_name' => $category_name));
+    $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+    return $data;
+}
+
+function delete_category ($id_to_delete) {
+    delete_category_from_categories ($id_to_delete);
+    delete_category_from_associations ($id_to_delete);
+    delete_category_from_synonyms ($id_to_delete);
+    delete_category_from_situations ($id_to_delete);
+}
+
+function delete_category_from_categories ($id_to_delete) {
+     $m = db();
+     $query = 'DELETE FROM salesscript_categories WHERE id= ? ';
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($id_to_delete));
+     //$data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     //return $data;
+}
+function delete_category_from_associations ($id_to_delete) {
+     $m = db();
+     $query = 'DELETE FROM salesscript_associations WHERE id= ?'  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($id_to_delete));
+     //$data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     //return $data;
+}
+function delete_category_from_synonyms ($id_to_delete) {
+     $m = db();
+     $query = 'DELETE FROM salesscript_synonyms WHERE id= :id'  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array(':id' => $id_to_delete));
+     //$data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     //return $data;
+}
+function delete_category_from_situations ($id_to_delete) {
+     $m = db();
+     $query = 'DELETE FROM salesscript_situations WHERE id= :id'  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array(':id' => $id_to_delete));
+     //$data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     //return $data;
+}
+
+function delete_association($first, $second) {
+     $m = db();
+     $query = 'DELETE FROM salesscript_associations WHERE id= :first AND id_second= :second';
+     $sth = $m -> prepare($query);
+     $sth -> execute(array(':first' => $first, ':second' => $second));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     return $data;
+}
+
+function delete_model($id_to_delete) {
+     $m = db();
+     $query = 'DELETE FROM salesscript_models WHERE i= :i';
+     $sth = $m -> prepare($query);
+     $sth -> execute(array(':i' => $id_to_delete));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     return $data;
+}
+
+function delete_situation($id_category, $category_name, $text_question, $text_answer, $model) {
+     $m = db();
+   //  $query = 'DELETE FROM salesscript_situations WHERE id=' . $id_category . ' AND text_question="' . $text_question . '" AND text_answer="' . $text_answer . '" AND model="' . $model . '"'  ;
+     $query = 'DELETE FROM salesscript_situations WHERE id= ? AND text_question= ? AND text_answer= ? AND model= ?'  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($id_category, $text_question, $text_answer, $model));
+    // $sth -> execute(array(':id_category' => $id_category, ':text_question' => $text_question, ':text_answer' => $text_answer, ':model' => $model));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     return $data;
+}
+
+function edit_situation($id_category, $category_name, $text_question, $text_question_new, $text_answer, $text_answer_new, $model, $model_new) {
+     $m = db();
+    // $query = 'UPDATE salesscript_situations SET text_question="' . $text_question_new . '", text_answer="' . $text_answer_new .  '", model="' . $model_new .  '" WHERE id=' . $id_category . ' AND text_question="' . $text_question . '" AND text_answer="' . $text_answer . '" AND model="' . $model . '"'  ;    
+     $query = 'UPDATE salesscript_situations SET text_question= ?, text_answer= ?, model=? WHERE id= ? AND text_question= ? AND text_answer= ? AND model= ?'  ;    
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($text_question_new, $text_answer_new, $model_new, $id_category, $text_question, $text_answer, $model));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     return $data;
+}
+
+function get_associations_query($to_search) {
+     $m = db();
+     $query = 'SELECT * FROM salesscript_associations WHERE category_name LIKE "%' . $to_search . '%"  OR category_second LIKE "%' . $to_search . '%" '  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($to_search));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     return $data;
+}
+
+function get_synonyms_main_category($to_search) {
+     $m = db();
+     $query = 'SELECT * FROM salesscript_synonims2 WHERE synonim LIKE "%' . $to_search . '%" '  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($to_search));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     return $data;
+}
+
+/* function get_synonyms_query($search) {
+     $m = db();
+     $query = "SELECT * FROM salesscript_synonims2 WHERE angara_name LIKE :search OR synonim LIKE :search"  ;
+     $sth = $m -> prepare($query);
+     $sth -> execute(array(':search' => '%' . $search . '%'));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+     //p($data);
+         return $data;
+     
+} */
+function get_synonyms_query($search) {
+    $m = db();
+    $query = "SELECT b.orig_name, c.slang_id FROM ss_slang as a
+            LEFT JOIN ss_slang_orig_bound as c
+            ON a.id = c.slang_id
+            LEFT JOIN ss_syn_orig as b
+            ON b.id = c.orig_id
+            WHERE a.slang_name LIKE :search"  ;
+    $sth = $m -> prepare($query);
+    $sth -> execute(array(':search' => '%' . $search . '%'));
+    $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+    //p($data);
+    return $data;
+    
+}
+
+function get_situations_query($to_search, $to_model) {
+    $situations_array = explode(" ", $to_search);   
+    $situations_search_string = '';
+    $and = '';    
+     for ($i=0; $i < count($situations_array); $i++){
+         if ($i != 0 ){
+             $and = ' ' . 'AND ';
+         }
+         else {
+             $and = '';
+         }
+         if (mb_strtolower(str_replace(' ', '', $situations_array[$i])) == mb_strtolower(str_replace(' ', '', $to_model))){
+            
+         }
+         else{
+             $situations_search_string .= $and . ' (text_question LIKE "%' . $situations_array[$i] . '%")';
+         }
+         
+     }
+    
+     $m = db();
+    // $query = 'SELECT * FROM salesscript_situations WHERE text_question LIKE "%' . $to_search . '%"'; //  OR synonym LIKE "%' . $to_search . '%" '  ;
+     $query = 'SELECT * FROM salesscript_situations WHERE ' . $situations_search_string . ' AND ( model LIKE "%' . $to_model . '%")';
+  //  p($query);
+     $sth = $m -> prepare($query);
+     $sth -> execute(array($to_search));
+     $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+  //  p($data);
+  //  return $query;
+     return $data;
+}
+
+function get_search_query($to_search, $car_name) {
+    $search_array = explode(" ", $to_search);   
+    $search_string = '';
+    $and = '';    
+     for ($i=0; $i < count($search_array); $i++){
+         if ($i != 0 ){
+             $and = ' ' . 'AND ';
+         }
+         else {
+             $and = '';
+         }
+         $search_string .= $and . ' (ang_name LIKE "%' . $search_array[$i] . '%")';
+     }
+     $m = db();
+    // $query = 'SELECT * FROM angara WHERE nal>0 AND price>0 AND ang_name LIKE :search_array ORDER BY price'; 
+     $query = 'SELECT * FROM angara WHERE ' . $search_string .  ' AND car = ? ORDER BY price LIMIT 100'; 
+     //p($query);
+     $sth = $m -> prepare($query);
+   //  $sth -> execute(array(":search_array" => "%" . $search_array[0] . "%"));
+    $sth -> execute(array($car_name));
+    $data = $sth -> fetchAll(PDO::FETCH_ASSOC);
+    return $data;
+}
+
+
+
+
+//p(get_search_query('печ сбор', 'porter'));
+//get_synonyms_query('запчасти для генератора');
+?>
